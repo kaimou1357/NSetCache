@@ -14,7 +14,6 @@ public class Cache {
     private int nWay;
     private int size;
     private int totalNumSets;
-    private String replacementAlgo;
     private ArrayList<CacheSet> cacheStorage;
 
     /**
@@ -38,10 +37,9 @@ public class Cache {
             this.totalNumSets = numEntries/nWay;
         }
         //If user does not pass in replacement algorithm, default to LRU
-        this.replacementAlgo = "LRU";
         cacheStorage = new ArrayList<>();
         for (int i = 0; i<totalNumSets; i++){
-            cacheStorage.add(new CacheSet(this.nWay, replacementAlgo));
+            cacheStorage.add(new ClientCacheSet(this.nWay));
         }
     }
 
@@ -49,28 +47,24 @@ public class Cache {
      * A custom constructor for the cache class. Allows user to specify what kind of replacement algorithm the Cache should use.
      * @param nWay
      * @param numEntries
-     * @param replacementAlgo
+     * @param customSet a CacheSet where the client can specify/override replacement algorithms
      */
-    public Cache(int nWay, int numEntries, String replacementAlgo){
+    public Cache(int nWay, int numEntries, ClientCacheSet customSet){
         if (nWay %2 != 0){
             System.out.println("Please enter a N that is a power of 2!");
             System.exit(1);
         }
-        int totalSetCount = 0;
         this.nWay = nWay;
         this.size = numEntries;
         if ((numEntries % nWay)!=0){
             this.totalNumSets = numEntries/nWay + 1;
         }
-
         else{
             this.totalNumSets = numEntries/nWay;
         }
-
-        this.replacementAlgo = replacementAlgo;
         cacheStorage = new ArrayList<>();
         for (int i = 0; i< totalNumSets; i++){
-            cacheStorage.add(new CacheSet(this.nWay, replacementAlgo));
+            cacheStorage.add(customSet.makeCopy());
         }
     }
 
@@ -103,7 +97,7 @@ public class Cache {
         int keySet = getHashMapIndex(getHash(key));
         //Grab the LinkedHashMap where the key should belong
         CacheSet tempCache = cacheStorage.get(keySet);
-        tempCache.put(key, value);
+        tempCache.putCustom(key, value);
 
     }
 
@@ -145,8 +139,8 @@ public class Cache {
     }
 
     /**
-     *
-     * @param intKey Given any arbitrary number from an Object's key, return the place in the array that the object's key matches.
+     * Given any arbitrary number from an Object's key, return the place in the array that the object's key matches.
+     * @param intKey intKey is returned from the key's byte representation of it's memory address
      * @return an index of the ArrayList where we can find each individual Cache Set.
      */
     private int getHashMapIndex(int intKey){
