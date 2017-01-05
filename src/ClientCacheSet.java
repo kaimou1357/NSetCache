@@ -1,7 +1,7 @@
 /**
  * Created by Kai Mou on 12/31/2016.
  */
-public class ClientCacheSet extends CacheSet{
+public class ClientCacheSet extends LinkedCacheSet{
     /**
      * Default constructor for each CacheSet. Default replacement algorithm should be LRU.
      * @param nWay
@@ -22,8 +22,5 @@ public class ClientCacheSet extends CacheSet{
     /**
      * Client can override CustomReplacement Algorithm here for determining which entries to evict from the set.
      */
-    @Override
-    public void CustomReplacement(){
-        //client can implement their own CustomReplacement algorithm here.
-    }
+
 }

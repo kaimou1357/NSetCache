@@ -13,7 +13,7 @@ import java.util.ArrayList;
 public class Cache {
     private int nWay;
     private int totalNumSets;
-    private ArrayList<CacheSet> cacheStorage;
+    private ArrayList<LinkedCacheSet> cacheStorage;
 
     /**
      * Most basic constructor for a NSet Cache
@@ -37,7 +37,7 @@ public class Cache {
         //If user does not pass in replacement algorithm, default to LRU
         cacheStorage = new ArrayList<>();
         for (int i = 0; i<totalNumSets; i++){
-            cacheStorage.add(new ClientCacheSet(this.nWay));
+            cacheStorage.add(new LinkedCacheSet(this.nWay));
         }
     }
 
@@ -47,7 +47,7 @@ public class Cache {
      * @param numEntries
      * @param customSet a CacheSet where the client can specify/override replacement algorithms
      */
-    public Cache(int nWay, int numEntries, ClientCacheSet customSet){
+    public Cache(int nWay, int numEntries, LinkedCacheSet customSet){
         if (nWay %2 != 0){
             System.out.println("Please enter a N that is a power of 2!");
             System.exit(1);
@@ -76,17 +76,15 @@ public class Cache {
         int keySet = getHashMapIndex(key.hashCode());
         int startingPoint = keySet;
         if (cacheStorage.get(startingPoint).containsKey(key)){
-            CacheSet tempCache = cacheStorage.get(keySet);
+            LinkedCacheSet tempCache = cacheStorage.get(keySet);
             returnedValue = tempCache.get(key);
         }
         else{
             for (int i = (startingPoint+1) % totalNumSets; !cacheStorage.get(i).containsKey(key) && i != startingPoint; i= (i+1) % (totalNumSets)){
-                System.out.println("Executed");
                 keySet = i;
             }
-            CacheSet tempCache = cacheStorage.get(keySet);
+            LinkedCacheSet tempCache = cacheStorage.get(keySet);
             returnedValue = tempCache.get(key);
-            System.out.println(tempCache);
             if (returnedValue == null){
                 //make a dummy function call to fetch the object from memory.
                 return null;
@@ -108,16 +106,16 @@ public class Cache {
         int keySet = getHashMapIndex(key.hashCode());
         int startingPoint = keySet;
         if (cacheStorage.get(startingPoint).hasSpace()){
-            CacheSet tempCache = cacheStorage.get(keySet);
-            tempCache.putCustom(key, value);
+            LinkedCacheSet tempCache = cacheStorage.get(keySet);
+            tempCache.put(key, value);
             return;
         }
         else{
             for (int i = (startingPoint + 1) % totalNumSets; !cacheStorage.get(i).hasSpace() && i != startingPoint; i = (i+1) % (totalNumSets)){
                 keySet = i;
             }
-            CacheSet tempCache = cacheStorage.get(keySet);
-            tempCache.putCustom(key, value);
+            LinkedCacheSet tempCache = cacheStorage.get(keySet);
+            tempCache.put(key, value);
         }
 
 
