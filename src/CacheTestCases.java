@@ -13,13 +13,14 @@ public class CacheTestCases {
         testMRU();
         System.out.println("All test cases passed!");
     }
+
     @Test
     public static void testBasicReadWrite(){
         ClientCache cache = new ClientCache(2, 8);
         cache.put("Leeroy", "Jenkins");
-        cache.put("Counter", "Strike");
+        cache.put("Kai", "Mou");
         Assert.assertEquals(cache.get("Leeroy"), "Jenkins");
-        Assert.assertEquals(cache.get("Counter"), "Strike");
+        Assert.assertEquals(cache.get("Kai"), "Mou");
 
     }
 
@@ -31,6 +32,7 @@ public class CacheTestCases {
         Assert.assertEquals(cache.get(16), "Mou");
 
     }
+
     @Test
     public static void testLRU(){
         ClientCache cache = new ClientCache(2, 2);

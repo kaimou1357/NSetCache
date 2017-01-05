@@ -77,6 +77,16 @@ public class CacheSet<T, U> extends LinkedHashMap<T, U> {
 
     }
 
+    /**
+     * A method that returns true or false depending on whether or not this set still has free blocks.
+     * @return
+     */
+    public boolean hasSpace(){
+        return size() < capacity;
+    }
+
+
+
 
 
 

@@ -12,7 +12,6 @@ import java.util.ArrayList;
  */
 public class Cache {
     private int nWay;
-    private int size;
     private int totalNumSets;
     private ArrayList<CacheSet> cacheStorage;
 
@@ -28,7 +27,6 @@ public class Cache {
         }
         int totalSetCount = 0;
         this.nWay = nWay;
-        this.size = numEntries;
         if ((numEntries % nWay)!=0){
             this.totalNumSets = numEntries/nWay + 1;
             System.out.println(totalSetCount);
@@ -55,7 +53,6 @@ public class Cache {
             System.exit(1);
         }
         this.nWay = nWay;
-        this.size = numEntries;
         if ((numEntries % nWay)!=0){
             this.totalNumSets = numEntries/nWay + 1;
         }
@@ -69,73 +66,62 @@ public class Cache {
     }
 
     /**
-     * Retrieves an item from the Cache
+     * Retrieves an item from the Cache. Uses linear probing to determine the next place for the HashMap.
      * @param key Key can be any object
      * @param <T>
      * @return Returns the object that is mapped to the key
      */
     public <T> T get(T key){
-
-        int keySet = getHashMapIndex(getHash(key));
-
-        CacheSet tempCache = cacheStorage.get(keySet);
-        Object returnedValue = tempCache.get(key);
-        if (returnedValue == null){
-            //make a dummy function call to fetch the object from memory.
+        Object returnedValue = null;
+        int keySet = getHashMapIndex(key.hashCode());
+        int startingPoint = keySet;
+        if (cacheStorage.get(startingPoint).containsKey(key)){
+            CacheSet tempCache = cacheStorage.get(keySet);
+            returnedValue = tempCache.get(key);
         }
+        else{
+            for (int i = (startingPoint+1) % totalNumSets; !cacheStorage.get(i).containsKey(key) && i != startingPoint; i= (i+1) % (totalNumSets)){
+                System.out.println("Executed");
+                keySet = i;
+            }
+            CacheSet tempCache = cacheStorage.get(keySet);
+            returnedValue = tempCache.get(key);
+            System.out.println(tempCache);
+            if (returnedValue == null){
+                //make a dummy function call to fetch the object from memory.
+                return null;
+            }
+        }
+
         return (T)returnedValue;
+
     }
 
     /**
-     * Puts an item in the Cache
+     * Puts an item in the Cache. Uses linear probing to place the item in the proper array index.
      * @param key Key can be any Java object
      * @param value value can be any Java object
      * @param <T>
      */
     public <T> void put(T key, T value){
 
-        int keySet = getHashMapIndex(getHash(key));
-        //Grab the LinkedHashMap where the key should belong
-        CacheSet tempCache = cacheStorage.get(keySet);
-        tempCache.putCustom(key, value);
-
-    }
-
-    /**
-     * Method generates an integer of an object using an object's memory address.
-     * @param key
-     * @param <T>
-     * @return Integer representation of an object's memory address
-     */
-    private <T> int getHash(T key){
-        byte[] keyBytes = null;
-        try{
-            keyBytes = key.toString().getBytes("UTF-8");
-        } catch(UnsupportedEncodingException e){
-            System.out.println("GetBytes() could not decode the string properly");
+        int keySet = getHashMapIndex(key.hashCode());
+        int startingPoint = keySet;
+        if (cacheStorage.get(startingPoint).hasSpace()){
+            CacheSet tempCache = cacheStorage.get(keySet);
+            tempCache.putCustom(key, value);
+            return;
+        }
+        else{
+            for (int i = (startingPoint + 1) % totalNumSets; !cacheStorage.get(i).hasSpace() && i != startingPoint; i = (i+1) % (totalNumSets)){
+                keySet = i;
+            }
+            CacheSet tempCache = cacheStorage.get(keySet);
+            tempCache.putCustom(key, value);
         }
 
-        MessageDigest md = null;
-        try{
-            md = MessageDigest.getInstance("MD5");
-        } catch (NoSuchAlgorithmException e){
-            e.printStackTrace();
-        }
 
-        byte[] hashBytes = md.digest(keyBytes);
-        return byteArrayToInt(hashBytes);
 
-    }
-
-    /**
-     *Generates the integer from a bytearray of the key's memory address following the Little Endian byte convention
-     * @param arr
-     * @return
-     */
-    private int byteArrayToInt(byte[] arr){
-        ByteBuffer buffer = ByteBuffer.wrap(arr);
-        buffer.order(ByteOrder.LITTLE_ENDIAN);
-        return Math.abs(buffer.getInt());
     }
 
     /**
@@ -144,6 +130,7 @@ public class Cache {
      * @return an index of the ArrayList where we can find each individual Cache Set.
      */
     private int getHashMapIndex(int intKey){
-        return (intKey % (size/nWay));
+        //use bitmask to ignore leading bit for positive/negative sign
+        return ((intKey & 0x7fffffff) % (totalNumSets));
     }
 }
