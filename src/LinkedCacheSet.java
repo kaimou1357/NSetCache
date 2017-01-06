@@ -1,3 +1,5 @@
+import com.petebevin.markdown.Replacement;
+
 import java.util.HashMap;
 import java.util.LinkedList;
 
@@ -6,7 +8,7 @@ import java.util.LinkedList;
  */
 public class LinkedCacheSet {
     private final int capacity;
-    private final String replacementAlgo;
+    private final ReplacementStrategyInterface replacementAlgo;
     private HashMap<Object, Node> map = new HashMap<Object, Node>();
     private LinkedList<Node> linkedList = new LinkedList<Node>();
 
@@ -21,9 +23,9 @@ public class LinkedCacheSet {
 
     public LinkedCacheSet(int capacity){
         this.capacity = capacity;
-        this.replacementAlgo = "LRU";
+        this.replacementAlgo = new LRUStrategy();
     }
-    public LinkedCacheSet(int capacity, String replacementAlgo){
+    public LinkedCacheSet(int capacity, ReplacementStrategyInterface replacementAlgo){
         this.capacity = capacity;
         this.replacementAlgo = replacementAlgo;
     }
@@ -65,18 +67,7 @@ public class LinkedCacheSet {
         else{
             Node newNode = new Node(key, value);
             if(map.size() >= capacity){
-                if (replacementAlgo.equals("LRU")){
-                    Node end = linkedList.get(capacity-1);
-                    map.remove(end.key);
-                    linkedList.remove(end);
-                }
-                else if (replacementAlgo.equals("MRU")){
-                    Node beginning = linkedList.get(0);
-                    map.remove(beginning.key);
-                    linkedList.remove(beginning);
-                }
-
-
+                replacementAlgo.replace(map, linkedList, capacity);
             }
             map.put(key, newNode);
             linkedList.add(0,newNode);

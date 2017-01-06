@@ -16,9 +16,9 @@ public class ClientCache extends Cache{
      * Custom ClientCache takes in a ClientCacheSet where the client can override replacement methods.
      * @param nWay Number of blocks in a set. Should be a power of 2
      * @param numEntries Total number of entries user would like to the cache to hold.
-     * @param clientSet CacheSet should specify replacement algorithm and can override replacement methods.
+     * @param clientReplacementStrategy CacheSet should specify replacement algorithm and can override replacement methods.
      */
-    public ClientCache(int nWay, int numEntries, ClientCacheSet clientSet){
-        super(nWay, numEntries, clientSet);
+    public ClientCache(int nWay, int numEntries, ReplacementStrategyInterface clientReplacementStrategy){
+        super(nWay, numEntries, clientReplacementStrategy);
     }
 }

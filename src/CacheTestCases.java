@@ -39,7 +39,6 @@ public class CacheTestCases {
         //create a 2 way cache with max of two entries. Should only be 1 set.
         cache.put("Leeroy", "Jenkins");
         cache.put("Kai", "Mou");
-
         cache.put("Extra", "Hi");
         //If LRU, "Jenkins" should be evicted.
         Assert.assertNull(cache.get("Leeroy"));
@@ -48,12 +47,10 @@ public class CacheTestCases {
 
     @Test
     public static void testMRU(){
-        ClientCacheSet set = new ClientCacheSet(2, "MRU");
-        ClientCache cache = new ClientCache(2,2, set);
-
+        MRUStrategy mruStrategy = new MRUStrategy();
+        ClientCache cache = new ClientCache(2,2, mruStrategy);
         cache.put("Leeroy", "Jenkins");
         cache.put("Kai", "Mou");
-
         cache.put("Extra", "Hi");
         //if MRU, "Mou" should be evicted
         Assert.assertNull(cache.get("Kai"));
